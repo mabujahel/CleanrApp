@@ -1,0 +1,25 @@
+@{
+    var ctrl   = ViewContext.RouteData.Values["controller"]?.ToString() ?? "";
+    var action = ViewContext.RouteData.Values["action"]?.ToString() ?? "";
+}
+<div class="px-3 mb-1">
+    <span class="menu-section">القائمة</span>
+</div>
+<div class="menu-item">
+    <a class="menu-link @(ctrl=="Customer" && action=="Index" ? "active" : "")" href="/Customer/Index">
+        <span class="menu-icon"><i class="bi bi-grid-1x2"></i></span>
+        <span class="menu-title">الرئيسية</span>
+    </a>
+</div>
+<div class="menu-item">
+    <a class="menu-link @(ctrl=="Customer" && action=="NewRequest" ? "active" : "")" href="/Customer/NewRequest">
+        <span class="menu-icon"><i class="bi bi-plus-circle"></i></span>
+        <span class="menu-title">طلب تنظيف جديد</span>
+    </a>
+</div>
+<div class="menu-item">
+    <a class="menu-link @(ctrl=="Customer" && action=="History" ? "active" : "")" href="/Customer/History">
+        <span class="menu-icon"><i class="bi bi-clock-history"></i></span>
+        <span class="menu-title">سجل الطلبات</span>
+    </a>
+</div>

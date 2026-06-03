@@ -1,0 +1,84 @@
+/* CleanrApp - Custom Arabic RTL Styles */
+
+* { font-family: 'Cairo', sans-serif !important; }
+
+/* RTL Fixes */
+[data-kt-app-layout="dark-sidebar"] .app-sidebar {
+    right: 0;
+    left: auto !important;
+}
+
+.app-wrapper {
+    padding-right: 265px;
+    padding-left: 0 !important;
+}
+
+body[data-kt-app-sidebar-minimize="on"] .app-wrapper {
+    padding-right: 75px;
+}
+
+@media (max-width: 991px) {
+    .app-wrapper { padding-right: 0 !important; }
+}
+
+/* Cursor */
+.cursor-pointer { cursor: pointer; }
+
+/* Service Card Hover */
+.service-card:hover {
+    border-color: #009ef7 !important;
+    background: rgba(0, 158, 247, 0.05);
+    transition: all 0.2s;
+}
+
+/* Unit Card */
+.unit-card:hover {
+    border-color: #009ef7 !important;
+    background: rgba(0, 158, 247, 0.05);
+    transition: all 0.2s;
+}
+
+/* Status Timeline */
+.timeline-label .timeline-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.timeline-badge {
+    flex-shrink: 0;
+    width: 1.5rem;
+    text-align: center;
+}
+
+/* RTL Table */
+.table th, .table td {
+    text-align: right;
+}
+
+/* Sidebar toggle button RTL */
+#kt_app_sidebar_toggle {
+    transform: translateX(50%) !important;
+}
+
+/* Alert close button */
+.alert .btn-close {
+    margin-right: auto;
+    margin-left: 0;
+}
+
+/* Card border-start to border-right in RTL */
+.border-start {
+    border-right: inherit !important;
+    border-left: 0 !important;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: #f1f1f1; }
+::-webkit-scrollbar-thumb { background: #c1c1c1; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #a8a8a8; }
+
+/* Toast RTL */
+.position-fixed.bottom-0.end-0 { left: 1rem; right: auto; }

@@ -1,0 +1,182 @@
+@model CleanrApp.Models.CleaningRequest
+@using CleanrApp.Models
+@{
+    ViewData["Title"] = $"طلب #{Model.RequestNumber}";
+}
+
+<div class="row g-5 justify-content-center">
+    <div class="col-lg-8">
+        <!-- Status Bar -->
+        <div class="card mb-5">
+            <div class="card-body py-4">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h4 class="fw-bold mb-1">@Model.RequestNumber</h4>
+                        <span class="text-muted fs-7">@Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")</span>
+                    </div>
+                    <partial name="_StatusBadge" model="Model.Status" />
+                </div>
+            </div>
+        </div>
+
+        <!-- Unit Info -->
+        <div class="card mb-5">
+            <div class="card-header"><h3 class="card-title"><i class="bi bi-building me-2 text-primary"></i>معلومات الوحدة</h3></div>
+            <div class="card-body">
+                <div class="row g-4">
+                    <div class="col-6">
+                        <div class="text-muted fs-8">رقم الوحدة</div>
+                        <div class="fw-bold fs-5">@Model.Unit?.UnitNumber</div>
+                    </div>
+                    <div class="col-6">
+                        <div class="text-muted fs-8">المبنى</div>
+                        <div class="fw-bold">@Model.Unit?.Building?.Name</div>
+                    </div>
+                    <div class="col-6">
+                        <div class="text-muted fs-8">الطابق</div>
+                        <div class="fw-bold">@Model.Unit?.Floor</div>
+                    </div>
+                    <div class="col-6">
+                        <div class="text-muted fs-8">الموعد</div>
+                        <div class="fw-bold">@(Model.ScheduledAt?.ToString("dd/MM HH:mm") ?? "فوري")</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tasks Checklist -->
+        <div class="card mb-5">
+            <div class="card-header"><h3 class="card-title"><i class="bi bi-list-check me-2 text-success"></i>قائمة المهام</h3></div>
+            <div class="card-body">
+                @if (!string.IsNullOrEmpty(Model.ServiceDescription))
+                {
+                    <div class="notice d-flex bg-light-warning rounded border-warning border border-dashed p-4 mb-5">
+                        <i class="bi bi-sticky fs-3 text-warning me-3"></i>
+                        <div><div class="fw-semibold mb-1">ملاحظات العميل</div><div>@Model.ServiceDescription</div></div>
+                    </div>
+                }
+
+                <div class="d-flex flex-column gap-3">
+                    @{
+                        void TaskItem(bool enabled, string icon, string label) {
+                            <div class="d-flex align-items-center gap-3 p-3 rounded-2 @(enabled ? "bg-light-success" : "bg-light")">
+                                <div class="symbol symbol-35px @(enabled ? "bg-success" : "bg-secondary") rounded">
+                                    <span class="symbol-label"><i class="bi @icon text-white fs-5"></i></span>
+                                </div>
+                                <span class="fw-semibold @(enabled ? "text-success" : "text-muted")">@label</span>
+                                @if (enabled) { <i class="bi bi-check-circle-fill text-success ms-auto"></i> }
+                            </div>
+                        }
+                    }
+                    @{ TaskItem(Model.ChangeBedSheet, "bi-layers", "تغيير مفرش السرير"); }
+                    @{ TaskItem(Model.ChangeLinens, "bi-square", "تغيير الملايات"); }
+                    @{ TaskItem(Model.ChangePillowCases, "bi-emoji-smile", "تغيير أكياس المخدات"); }
+                    @{ TaskItem(Model.MakeBed, "bi-house-heart", "ترتيب السرير"); }
+                    @{ TaskItem(Model.CleanBathroom, "bi-droplet", "تنظيف دورة المياه"); }
+                    @{ TaskItem(Model.CleanKitchen, "bi-fire", "تنظيف المطبخ"); }
+                </div>
+            </div>
+        </div>
+
+        <!-- Photos Upload -->
+        @if (Model.Status == RequestStatus.InProgress)
+        {
+            <div class="card mb-5">
+                <div class="card-header"><h3 class="card-title"><i class="bi bi-camera me-2"></i>رفع الصور</h3></div>
+                <div class="card-body">
+                    <form asp-action="UploadPhotos" method="post" enctype="multipart/form-data">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="requestId" value="@Model.Id" />
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold">نوع الصور</label>
+                            <select name="photoType" class="form-select">
+                                <option value="2">بعد التنظيف</option>
+                                <option value="3">السرير</option>
+                                <option value="4">الحمام</option>
+                                <option value="5">المطبخ</option>
+                                <option value="6">أخرى</option>
+                            </select>
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold">اختر الصور</label>
+                            <input type="file" name="photos" class="form-control" multiple accept="image/*" />
+                        </div>
+                        <button type="submit" class="btn btn-info w-100">
+                            <i class="bi bi-cloud-upload me-2"></i>رفع الصور
+                        </button>
+                    </form>
+
+                    @if (Model.Photos.Any())
+                    {
+                        <div class="row g-2 mt-4">
+                            @foreach (var p in Model.Photos)
+                            {
+                                <div class="col-4">
+                                    <img src="@p.FilePath" class="img-fluid rounded" style="height:100px;object-fit:cover;width:100%;" />
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+
+        <!-- Action Buttons -->
+        @if (Model.Status == RequestStatus.AssignedCleaner)
+        {
+            <div class="card border-primary">
+                <div class="card-body text-center py-6">
+                    <i class="bi bi-play-circle text-primary fs-3x mb-3 d-block"></i>
+                    <h5 class="mb-4">ابدأ التنظيف الآن</h5>
+                    <form asp-action="StartCleaning" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="requestId" value="@Model.Id" />
+                        <button type="submit" class="btn btn-primary btn-lg w-100">
+                            <i class="bi bi-play-fill me-2"></i>بدء التنظيف
+                        </button>
+                    </form>
+                </div>
+            </div>
+        }
+
+        @if (Model.Status == RequestStatus.InProgress)
+        {
+            <div class="card border-success">
+                <div class="card-header bg-light-success border-0">
+                    <h3 class="card-title text-success">إنهاء التنظيف</h3>
+                </div>
+                <div class="card-body">
+                    <form asp-action="FinishCleaning" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="requestId" value="@Model.Id" />
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold">ملاحظات ختامية (اختياري)</label>
+                            <textarea name="notes" class="form-control" rows="3" placeholder="أي ملاحظات على الوحدة أو الطلب..."></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-success btn-lg w-100"
+                                onclick="return confirm('هل أنهيت جميع المهام؟')">
+                            <i class="bi bi-check2-all me-2"></i>تم الانتهاء من التنظيف
+                        </button>
+                    </form>
+                </div>
+            </div>
+        }
+
+        @if (Model.Status == RequestStatus.Done)
+        {
+            <div class="notice d-flex bg-light-success rounded border-success border border-dashed p-6">
+                <i class="bi bi-check-circle-fill fs-2x text-success me-4"></i>
+                <div>
+                    <h5 class="text-success fw-bold">تم الانتهاء من التنظيف</h5>
+                    <div class="text-muted">في انتظار مراجعة المشرف والاعتماد النهائي</div>
+                </div>
+            </div>
+        }
+
+        <div class="mt-5">
+            <a asp-action="Index" class="btn btn-light w-100">
+                <i class="bi bi-arrow-right me-2"></i>العودة
+            </a>
+        </div>
+    </div>
+</div>

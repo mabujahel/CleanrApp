@@ -1,0 +1,11 @@
+**/.vs
+**/.vscode
+**/bin
+**/obj
+**/.git
+**/.gitignore
+**/node_modules
+Data/*.db
+Data/*.db-shm
+Data/*.db-wal
+wwwroot/uploads

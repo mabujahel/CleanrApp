@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: cleanrapp
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    plan: free
+    envVars:
+      - key: ASPNETCORE_ENVIRONMENT
+        value: Production
+      - key: PORT
+        value: 10000
+    disk:
+      name: cleanrapp-data
+      mountPath: /app/Data
+      sizeGB: 1

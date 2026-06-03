@@ -1,0 +1,51 @@
+@model List<CleanrApp.Models.CleaningRequest>
+@using CleanrApp.Models
+@{
+    ViewData["Title"] = "سجل طلباتي";
+}
+
+<div class="card">
+    <div class="card-header border-0 pt-5">
+        <h3 class="card-title"><span class="card-label fw-bold fs-3">سجل جميع الطلبات</span></h3>
+        <div class="card-toolbar">
+            <a asp-action="NewRequest" class="btn btn-sm btn-primary">
+                <i class="bi bi-plus-circle me-2"></i>طلب جديد
+            </a>
+        </div>
+    </div>
+    <div class="card-body py-3">
+        <div class="table-responsive">
+            <table class="table table-row-dashed table-row-gray-300 align-middle gs-0 gy-4">
+                <thead>
+                    <tr class="fw-bold text-muted bg-light">
+                        <th>رقم الطلب</th><th>الوحدة</th><th>الموعد</th><th>الحالة</th><th>إجراء</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var req in Model)
+                    {
+                        <tr>
+                            <td class="fw-bold">@req.RequestNumber</td>
+                            <td>وحدة @req.Unit?.UnitNumber - @req.Unit?.Building?.Name</td>
+                            <td class="text-muted fs-8">@req.CreatedAt.ToString("dd/MM/yyyy")</td>
+                            <td><partial name="_StatusBadge" model="req.Status" /></td>
+                            <td>
+                                <a asp-action="RequestDetail" asp-route-id="@req.Id"
+                                   class="btn btn-icon btn-bg-light btn-active-color-primary btn-sm">
+                                    <i class="bi bi-eye fs-5"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                    @if (!Model.Any())
+                    {
+                        <tr><td colspan="5" class="text-center text-muted py-15">
+                            <i class="bi bi-inbox fs-2tx text-gray-300 d-block mb-4"></i>
+                            لا توجد طلبات سابقة
+                        </td></tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

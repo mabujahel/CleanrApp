@@ -1,0 +1,467 @@
+@model CleanrApp.ViewModels.LoginViewModel
+@{
+    Layout = null;
+    ViewData["Title"] = "تسجيل الدخول";
+}
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CleanrApp - تسجيل الدخول</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link href="~/lib/bootstrap/dist/css/bootstrap.rtl.min.css" rel="stylesheet" />
+    <style>
+        *, *::before, *::after { box-sizing: border-box; font-family: 'Cairo', sans-serif !important; }
+
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+
+        .login-page {
+            display: flex;
+            height: 100vh;
+            flex-direction: row-reverse; /* RTL: form on right, visual on left */
+        }
+
+        /* ===== LEFT PANEL (Visual) ===== */
+        .visual-panel {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+            background: #3a0ca3;
+        }
+
+        .visual-panel::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background:
+                linear-gradient(135deg, #7209b7 0%, #3a0ca3 40%, #4361ee 100%);
+            z-index: 0;
+        }
+
+        /* Geometric lines SVG background */
+        .visual-lines {
+            position: absolute;
+            inset: 0;
+            z-index: 1;
+            opacity: 0.25;
+        }
+
+        .visual-content {
+            position: relative;
+            z-index: 2;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            justify-content: flex-end;
+            padding: 3.5rem;
+        }
+
+        .visual-title {
+            color: #fff;
+            font-size: clamp(1.8rem, 3vw, 2.8rem);
+            font-weight: 800;
+            line-height: 1.2;
+            margin-bottom: 1rem;
+        }
+
+        .visual-sub {
+            color: rgba(255,255,255,0.7);
+            font-size: 1rem;
+            font-weight: 400;
+            line-height: 1.7;
+            max-width: 380px;
+        }
+
+        .visual-dots {
+            display: flex;
+            gap: 8px;
+            margin-top: 2rem;
+        }
+
+        .visual-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.3);
+        }
+
+        .visual-dot.active {
+            width: 24px;
+            border-radius: 4px;
+            background: #fff;
+        }
+
+        /* ===== RIGHT PANEL (Form) ===== */
+        .form-panel {
+            width: 480px;
+            flex-shrink: 0;
+            background: #fff;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 3rem 3.5rem;
+            overflow-y: auto;
+        }
+
+        @@media (max-width: 768px) {
+            .visual-panel { display: none; }
+            .form-panel { width: 100%; }
+        }
+
+        /* Brand */
+        .brand-wrap { text-align: center; margin-bottom: 2.5rem; }
+
+        .brand-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #7209b7, #4361ee);
+            border-radius: 16px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1rem;
+            box-shadow: 0 8px 24px rgba(114,9,183,0.3);
+        }
+
+        .brand-icon i { color: #fff; font-size: 1.6rem; }
+
+        .brand-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #181c32;
+            margin: 0 0 0.2rem;
+        }
+
+        .brand-sub {
+            font-size: 0.82rem;
+            color: #a1a5b7;
+            margin: 0;
+        }
+
+        /* Form heading */
+        .form-heading {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: #181c32;
+            margin-bottom: 0.35rem;
+        }
+
+        .form-heading-sub {
+            font-size: 0.85rem;
+            color: #a1a5b7;
+            margin-bottom: 1.75rem;
+        }
+
+        /* Input group */
+        .field-wrap { margin-bottom: 1.2rem; }
+
+        .field-label {
+            display: block;
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: #5e6278;
+            margin-bottom: 0.4rem;
+        }
+
+        .field-input {
+            width: 100%;
+            border: 1.5px solid #e4e6ef;
+            border-radius: 10px;
+            padding: 0.7rem 1rem;
+            font-size: 0.9rem;
+            color: #181c32;
+            background: #fcfcfc;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .field-input:focus {
+            border-color: #7209b7;
+            box-shadow: 0 0 0 3px rgba(114,9,183,0.1);
+            background: #fff;
+        }
+
+        .field-input::placeholder { color: #b5b5c3; }
+
+        /* Remember / Forgot */
+        .remember-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+        }
+
+        .check-wrap {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+        }
+
+        .check-wrap input[type=checkbox] {
+            width: 16px;
+            height: 16px;
+            accent-color: #7209b7;
+            cursor: pointer;
+        }
+
+        .check-label {
+            font-size: 0.83rem;
+            color: #5e6278;
+            user-select: none;
+        }
+
+        .forgot-link {
+            font-size: 0.83rem;
+            color: #7209b7;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .forgot-link:hover { text-decoration: underline; }
+
+        /* Sign In Button */
+        .btn-signin {
+            width: 100%;
+            padding: 0.82rem;
+            border: none;
+            border-radius: 50px;
+            background: linear-gradient(135deg, #7209b7, #4361ee);
+            color: #fff;
+            font-size: 0.95rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.25s;
+            box-shadow: 0 6px 20px rgba(114,9,183,0.35);
+            letter-spacing: 0.3px;
+        }
+
+        .btn-signin:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 28px rgba(114,9,183,0.45);
+        }
+
+        .btn-signin:active { transform: translateY(0); }
+
+        /* Divider */
+        .divider {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .divider::before, .divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: #e4e6ef;
+        }
+
+        .divider span {
+            font-size: 0.78rem;
+            color: #b5b5c3;
+            white-space: nowrap;
+        }
+
+        /* Demo accounts */
+        .demo-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.6rem;
+        }
+
+        .demo-btn {
+            border: 1.5px solid #e4e6ef;
+            border-radius: 10px;
+            padding: 0.55rem 0.75rem;
+            background: #fafafa;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: right;
+        }
+
+        .demo-btn:hover {
+            border-color: #7209b7;
+            background: rgba(114,9,183,0.04);
+        }
+
+        .demo-role {
+            font-size: 0.68rem;
+            color: #a1a5b7;
+            display: block;
+            margin-bottom: 1px;
+        }
+
+        .demo-name {
+            font-size: 0.82rem;
+            font-weight: 700;
+            color: #181c32;
+        }
+
+        /* Error */
+        .error-box {
+            background: rgba(241,65,108,0.08);
+            border: 1px solid rgba(241,65,108,0.25);
+            border-radius: 10px;
+            padding: 0.75rem 1rem;
+            color: #d9214e;
+            font-size: 0.85rem;
+            margin-bottom: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Bottom link */
+        .bottom-link {
+            text-align: center;
+            margin-top: 1.5rem;
+            font-size: 0.83rem;
+            color: #a1a5b7;
+        }
+
+        .bottom-link a { color: #7209b7; font-weight: 700; text-decoration: none; }
+        .bottom-link a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+<div class="login-page">
+
+    <!-- Visual Panel (Left) -->
+    <div class="visual-panel">
+        <svg class="visual-lines" viewBox="0 0 800 900" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+            <!-- Geometric building / architectural lines -->
+            <line x1="800" y1="0"   x2="0"   y2="900" stroke="white" stroke-width="1.2"/>
+            <line x1="800" y1="50"  x2="50"  y2="900" stroke="white" stroke-width="0.8"/>
+            <line x1="800" y1="120" x2="120" y2="900" stroke="white" stroke-width="0.6"/>
+            <line x1="800" y1="200" x2="200" y2="900" stroke="white" stroke-width="0.5"/>
+            <line x1="800" y1="300" x2="300" y2="900" stroke="white" stroke-width="0.4"/>
+            <line x1="800" y1="400" x2="400" y2="900" stroke="white" stroke-width="0.4"/>
+            <line x1="800" y1="500" x2="500" y2="900" stroke="white" stroke-width="0.4"/>
+            <line x1="750" y1="0"   x2="0"   y2="800" stroke="white" stroke-width="0.8"/>
+            <line x1="650" y1="0"   x2="0"   y2="700" stroke="white" stroke-width="0.6"/>
+            <line x1="550" y1="0"   x2="0"   y2="600" stroke="white" stroke-width="0.5"/>
+            <line x1="400" y1="0"   x2="0"   y2="500" stroke="white" stroke-width="0.4"/>
+            <line x1="250" y1="0"   x2="0"   y2="350" stroke="white" stroke-width="0.4"/>
+            <!-- Horizontal accent -->
+            <line x1="0" y1="300" x2="800" y2="500" stroke="white" stroke-width="0.5"/>
+            <line x1="0" y1="200" x2="800" y2="400" stroke="white" stroke-width="0.3"/>
+            <!-- Circle accents -->
+            <circle cx="600" cy="150" r="180" stroke="white" stroke-width="0.5" fill="none" opacity="0.3"/>
+            <circle cx="600" cy="150" r="280" stroke="white" stroke-width="0.3" fill="none" opacity="0.2"/>
+        </svg>
+
+        <div class="visual-content">
+            <h1 class="visual-title">
+                منصة إدارة<br>خدمات التنظيف
+            </h1>
+            <p class="visual-sub">
+                نظام متكامل لإدارة طلبات التنظيف للوحدات السكنية والفندقية،
+                مع متابعة لحظية لجميع العمليات من البداية حتى الاعتماد النهائي.
+            </p>
+            <div class="visual-dots">
+                <div class="visual-dot active"></div>
+                <div class="visual-dot"></div>
+                <div class="visual-dot"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Form Panel (Right) -->
+    <div class="form-panel">
+        <div class="brand-wrap">
+            <div class="brand-icon">
+                <i class="bi bi-building-check"></i>
+            </div>
+            <p class="brand-title">CleanrApp</p>
+            <p class="brand-sub">نظام إدارة خدمات التنظيف</p>
+        </div>
+
+        <h2 class="form-heading">تسجيل الدخول</h2>
+        <p class="form-heading-sub">أدخل بياناتك للوصول إلى لوحة التحكم</p>
+
+        @if (!ViewContext.ModelState.IsValid && ViewContext.ModelState.Values.Any(v => v.Errors.Any()))
+        {
+            <div class="error-box">
+                <i class="bi bi-exclamation-circle-fill"></i>
+                البريد الإلكتروني أو كلمة المرور غير صحيحة
+            </div>
+        }
+
+        <form asp-action="Login" method="post" id="loginForm">
+            <input type="hidden" name="returnUrl" value="@ViewData["ReturnUrl"]" />
+
+            <div class="field-wrap">
+                <label class="field-label">البريد الإلكتروني</label>
+                <input asp-for="Email" class="field-input" placeholder="example@cleanrapp.com"
+                       autocomplete="email" id="emailInput" />
+            </div>
+
+            <div class="field-wrap">
+                <label class="field-label">كلمة المرور</label>
+                <input asp-for="Password" type="password" class="field-input"
+                       placeholder="••••••••" autocomplete="current-password" id="passInput" />
+            </div>
+
+            <div class="remember-row">
+                <label class="check-wrap">
+                    <input asp-for="RememberMe" type="checkbox" />
+                    <span class="check-label">تذكرني</span>
+                </label>
+                <a href="#" class="forgot-link">نسيت كلمة المرور؟</a>
+            </div>
+
+            <button type="submit" class="btn-signin" id="loginBtn">
+                تسجيل الدخول
+            </button>
+        </form>
+
+        <div class="divider"><span>أو جرّب حساباً تجريبياً</span></div>
+
+        <div class="demo-grid">
+            <div class="demo-btn" onclick="quickLogin('admin@cleanrapp.com','Admin@123456')">
+                <span class="demo-role">مدير النظام</span>
+                <span class="demo-name">Admin</span>
+            </div>
+            <div class="demo-btn" onclick="quickLogin('supervisor@cleanrapp.com','Supervisor@123456')">
+                <span class="demo-role">مشرف</span>
+                <span class="demo-name">Supervisor</span>
+            </div>
+            <div class="demo-btn" onclick="quickLogin('cleaner@cleanrapp.com','Cleaner@123456')">
+                <span class="demo-role">عامل تنظيف</span>
+                <span class="demo-name">Cleaner</span>
+            </div>
+            <div class="demo-btn" onclick="quickLogin('customer@cleanrapp.com','Customer@123456')">
+                <span class="demo-role">عميل</span>
+                <span class="demo-name">Customer</span>
+            </div>
+        </div>
+
+        <div class="bottom-link">
+            &copy; @DateTime.Now.Year CleanrApp — جميع الحقوق محفوظة
+        </div>
+    </div>
+</div>
+
+<script>
+    function quickLogin(email, pass) {
+        document.getElementById('emailInput').value = email;
+        document.getElementById('passInput').value = pass;
+        const btn = document.getElementById('loginBtn');
+        btn.textContent = 'جارٍ الدخول...';
+        btn.style.opacity = '0.8';
+        document.getElementById('loginForm').submit();
+    }
+</script>
+</body>
+</html>

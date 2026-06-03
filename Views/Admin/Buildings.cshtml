@@ -1,0 +1,57 @@
+@model List<CleanrApp.Models.Building>
+@{
+    ViewData["Title"] = "إدارة المباني";
+}
+
+<div class="row g-5">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header"><h3 class="card-title">المباني (@Model.Count)</h3></div>
+            <div class="card-body py-3">
+                <div class="table-responsive">
+                    <table class="table table-row-dashed align-middle gs-0 gy-4">
+                        <thead><tr class="fw-bold text-muted bg-light">
+                            <th class="ps-4">اسم المبنى</th><th>العنوان</th><th>عدد الوحدات</th><th>الحالة</th>
+                        </tr></thead>
+                        <tbody>
+                            @foreach (var b in Model)
+                            {
+                                <tr>
+                                    <td class="ps-4 fw-bold">@b.Name</td>
+                                    <td class="text-muted">@(b.Address ?? "—")</td>
+                                    <td><span class="badge badge-light-primary">@b.Units.Count وحدة</span></td>
+                                    <td><span class="badge @(b.IsActive ? "badge-light-success" : "badge-light-danger")">@(b.IsActive ? "نشط" : "موقوف")</span></td>
+                                </tr>
+                            }
+                            @if (!Model.Any())
+                            {
+                                <tr><td colspan="4" class="text-center text-muted py-10">لا توجد مباني</td></tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header"><h3 class="card-title">إضافة مبنى جديد</h3></div>
+            <div class="card-body">
+                <form asp-action="CreateBuilding" method="post">
+                    @Html.AntiForgeryToken()
+                    <div class="mb-4">
+                        <label class="form-label required fw-semibold">اسم المبنى</label>
+                        <input name="name" class="form-control" placeholder="مثال: برج الياسمين" required />
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">العنوان</label>
+                        <input name="address" class="form-control" placeholder="المدينة - الحي" />
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-building-add me-2"></i>إضافة المبنى
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,191 @@
+@model CleanrApp.ViewModels.DashboardViewModel
+@{
+    ViewData["Title"] = "لوحة تحكم المدير";
+}
+
+<!-- Stats Row -->
+<div class="row g-4 mb-5">
+    <div class="col-sm-6 col-xl-3">
+        <div class="card card-flush h-xl-100">
+            <div class="card-header pt-5">
+                <div class="card-title d-flex flex-column">
+                    <span class="fs-2hx fw-bold text-dark me-2 lh-1 ls-n2">@Model.TotalRequests</span>
+                    <span class="text-gray-500 pt-1 fw-semibold fs-6">إجمالي الطلبات</span>
+                </div>
+            </div>
+            <div class="card-body d-flex align-items-end px-0 pb-0 pt-3">
+                <div class="d-flex align-items-center flex-column w-100 px-9 mb-4">
+                    <div class="d-flex p-3 justify-content-between fw-bold fs-6 text-gray-500 w-100 mb-2">
+                        <span>مكتملة</span>
+                        <span>@(Model.TotalRequests > 0 ? (Model.CompletedRequests * 100 / Model.TotalRequests) : 0)%</span>
+                    </div>
+                    <div class="h-8px mx-3 w-100 bg-light-primary rounded">
+                        <div class="bg-primary rounded h-8px" style="width: @(Model.TotalRequests > 0 ? (Model.CompletedRequests * 100 / Model.TotalRequests) : 0)%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-sm-6 col-xl-3">
+        <div class="card card-flush h-xl-100">
+            <div class="card-header pt-5">
+                <div class="card-title d-flex flex-column">
+                    <span class="fs-2hx fw-bold text-dark me-2 lh-1 ls-n2">@Model.PendingRequests</span>
+                    <span class="text-gray-500 pt-1 fw-semibold fs-6">قيد الانتظار</span>
+                </div>
+            </div>
+            <div class="card-body d-flex align-items-end px-0 pb-0 pt-3">
+                <div class="d-flex align-items-center flex-column w-100 px-9 mb-4">
+                    <div class="d-flex p-3 justify-content-between fw-bold fs-6 text-warning w-100 mb-2">
+                        <span> </span><span>@Model.TodayRequests</span>
+                    </div>
+                    <div class="h-8px mx-3 w-100 bg-light-warning rounded">
+                        <div class="bg-warning rounded h-8px" style="width: @(Model.TotalRequests > 0 ? Math.Min(Model.PendingRequests * 100 / Math.Max(Model.TotalRequests,1), 100) : 0)%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-sm-6 col-xl-3">
+        <div class="card card-flush h-xl-100">
+            <div class="card-header pt-5">
+                <div class="card-title d-flex flex-column">
+                    <span class="fs-2hx fw-bold text-dark me-2 lh-1 ls-n2">@Model.InProgressRequests</span>
+                    <span class="text-gray-500 pt-1 fw-semibold fs-6">جاري التنفيذ</span>
+                </div>
+            </div>
+            <div class="card-body d-flex align-items-end px-0 pb-0 pt-3">
+                <div class="d-flex align-items-center flex-column w-100 px-9 mb-4">
+                    <div class="p-3 d-flex justify-content-between fw-bold fs-6 text-info w-100 mb-2">
+                        <span>نشط</span><span>@Model.InProgressRequests</span>
+                    </div>
+                    <div class="h-8px mx-3 w-100 bg-light-info rounded">
+                        <div class="bg-info rounded h-8px" style="width:@(Model.TotalRequests > 0 ? Math.Min(Model.InProgressRequests * 100 / Math.Max(Model.TotalRequests,1), 100) : 0)%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-sm-6 col-xl-3">
+        <div class="card card-flush h-xl-100">
+            <div class="card-header pt-5">
+                <div class="card-title d-flex flex-column">
+                    <span class="fs-2hx fw-bold text-dark me-2 lh-1 ls-n2">@Model.CompletedRequests</span>
+                    <span class="text-gray-500 pt-1 fw-semibold fs-6">مكتملة</span>
+                </div>
+            </div>
+            <div class="card-body d-flex align-items-end px-0 pb-0 pt-3">
+                <div class="d-flex align-items-center flex-column w-100 px-9 mb-4">
+                    <div class="d-flex p-3 justify-content-between fw-bold fs-6 text-success w-100 mb-2">
+                        <span>ملغاة</span><span>@Model.CancelledRequests</span>
+                    </div>
+                    <div class="h-8px mx-3 w-100 bg-light-success rounded">
+                        <div class="bg-success rounded h-8px" style="width:@(Model.TotalRequests > 0 ? Math.Min(Model.CompletedRequests * 100 / Math.Max(Model.TotalRequests,1), 100) : 0)%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Users Summary -->
+<div class="row g-4 mb-5">
+    <div class="col-md-4">
+        <div class="card bg-light-primary">
+            <div class="card-body d-flex align-items-center gap-4 py-4">
+                <div class="symbol symbol-50px bg-primary rounded-2">
+                    <span class="symbol-label"><i class="bi bi-people text-white fs-2"></i></span>
+                </div>
+                <div>
+                    <div class="fs-2x fw-bold text-primary">@Model.TotalCustomers</div>
+                    <div class="text-gray-600 fw-semibold">عميل مسجل</div>
+                </div>
+                <a asp-controller="Admin" asp-action="Customers" class="btn btn-sm btn-primary ms-auto">عرض</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card bg-light-warning">
+            <div class="card-body d-flex align-items-center gap-4 py-4">
+                <div class="symbol symbol-50px bg-warning rounded-2">
+                    <span class="symbol-label"><i class="bi bi-person-badge text-white fs-2"></i></span>
+                </div>
+                <div>
+                    <div class="fs-2x fw-bold text-warning">@Model.TotalSupervisors</div>
+                    <div class="text-gray-600 fw-semibold">مشرف</div>
+                </div>
+                <a asp-controller="Admin" asp-action="Supervisors" class="btn btn-sm btn-warning ms-auto">عرض</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card bg-light-success">
+            <div class="card-body d-flex align-items-center gap-4 py-4">
+                <div class="symbol symbol-50px bg-success rounded-2">
+                    <span class="symbol-label"><i class="bi bi-person-workspace text-white fs-2"></i></span>
+                </div>
+                <div>
+                    <div class="fs-2x fw-bold text-success">@Model.TotalCleaners</div>
+                    <div class="text-gray-600 fw-semibold">عامل تنظيف</div>
+                </div>
+                <a asp-controller="Admin" asp-action="Cleaners" class="btn btn-sm btn-success ms-auto">عرض</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Requests -->
+<div class="card">
+    <div class="card-header border-0 pt-5">
+        <h3 class="card-title align-items-start flex-column">
+            <span class="card-label fw-bold fs-3 mb-1">أحدث الطلبات</span>
+            <span class="text-muted mt-1 fw-semibold fs-7">آخر 10 طلبات في النظام</span>
+        </h3>
+        <div class="card-toolbar">
+            <a asp-controller="Admin" asp-action="Requests" class="btn btn-sm btn-primary">
+                <i class="bi bi-list me-1"></i>عرض الكل
+            </a>
+        </div>
+    </div>
+    <div class="card-body py-3">
+        <div class="table-responsive">
+            <table class="table table-row-dashed table-row-gray-300 align-middle gs-0 gy-4">
+                <thead>
+                    <tr class="fw-bold text-muted">
+                        <th>رقم الطلب</th>
+                        <th>العميل</th>
+                        <th>الوحدة</th>
+                        <th>الحالة</th>
+                        <th>التاريخ</th>
+                        <th>إجراء</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var req in Model.RecentRequests)
+                    {
+                        <tr>
+                            <td><span class="fw-bold text-dark">@req.RequestNumber</span></td>
+                            <td>@req.Customer?.FullName</td>
+                            <td>@req.Unit?.UnitNumber - @req.Unit?.Building?.Name</td>
+                            <td><partial name="_StatusBadge" model="req.Status" /></td>
+                            <td class="text-muted fs-7">@req.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td>
+                                <a asp-controller="Admin" asp-action="RequestDetail" asp-route-id="@req.Id"
+                                   class="btn btn-icon btn-bg-light btn-active-color-primary btn-sm">
+                                    <i class="bi bi-eye fs-4"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                    @if (!Model.RecentRequests.Any())
+                    {
+                        <tr><td colspan="6" class="text-center text-muted py-10">لا توجد طلبات بعد</td></tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

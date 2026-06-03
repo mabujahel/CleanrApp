@@ -1,0 +1,2 @@
+/* Remove default margin from dotnet template */
+body { margin-bottom: 0 !important; }

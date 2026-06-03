@@ -1,0 +1,19 @@
+@{
+    var ctrl   = ViewContext.RouteData.Values["controller"]?.ToString() ?? "";
+    var action = ViewContext.RouteData.Values["action"]?.ToString() ?? "";
+}
+<div class="px-3 mb-1">
+    <span class="menu-section">القائمة</span>
+</div>
+<div class="menu-item">
+    <a class="menu-link @(ctrl=="Cleaner" && action=="Index" ? "active" : "")" href="/Cleaner/Index">
+        <span class="menu-icon"><i class="bi bi-list-task"></i></span>
+        <span class="menu-title">مهامي اليوم</span>
+    </a>
+</div>
+<div class="menu-item">
+    <a class="menu-link @(ctrl=="Cleaner" && action=="History" ? "active" : "")" href="/Cleaner/History">
+        <span class="menu-icon"><i class="bi bi-clock-history"></i></span>
+        <span class="menu-title">سجل الأعمال</span>
+    </a>
+</div>

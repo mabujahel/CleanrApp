@@ -1,0 +1,64 @@
+@model List<CleanrApp.Models.Unit>
+@using CleanrApp.Models
+@{
+    ViewData["Title"] = "إدارة الوحدات";
+}
+
+<div class="card">
+    <div class="card-header border-0 pt-5">
+        <h3 class="card-title">
+            <span class="card-label fw-bold fs-3">الوحدات</span>
+            <span class="text-muted ms-3 fs-7">(@Model.Count وحدة)</span>
+        </h3>
+        <div class="card-toolbar">
+            <a asp-action="CreateUnit" class="btn btn-sm btn-primary">
+                <i class="bi bi-plus-circle me-2"></i>إضافة وحدة
+            </a>
+        </div>
+    </div>
+    <div class="card-body py-3">
+        <div class="table-responsive">
+            <table class="table table-row-dashed table-row-gray-300 align-middle gs-0 gy-4">
+                <thead>
+                    <tr class="fw-bold text-muted bg-light">
+                        <th class="ps-4">رقم الوحدة</th>
+                        <th>المبنى</th>
+                        <th>النوع</th>
+                        <th>الطابق</th>
+                        <th>العميل</th>
+                        <th>الحالة</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var unit in Model)
+                    {
+                        <tr>
+                            <td class="ps-4 fw-bold fs-6">@unit.UnitNumber</td>
+                            <td>@unit.Building?.Name</td>
+                            <td>
+                                @{
+                                    var typeLabel = unit.UnitType switch {
+                                        UnitType.Apartment => "شقة",
+                                        UnitType.Room => "غرفة فندقية",
+                                        UnitType.Villa => "فيلا",
+                                        UnitType.Studio => "استوديو",
+                                        UnitType.Suite => "جناح",
+                                        _ => unit.UnitType.ToString()
+                                    };
+                                }
+                                <span class="badge badge-light-info">@typeLabel</span>
+                            </td>
+                            <td>الطابق @unit.Floor</td>
+                            <td>@(unit.Customer?.FullName ?? "<span class='text-muted'>—</span>")</td>
+                            <td><span class="badge @(unit.IsActive ? "badge-light-success" : "badge-light-danger")">@(unit.IsActive ? "نشط" : "موقوف")</span></td>
+                        </tr>
+                    }
+                    @if (!Model.Any())
+                    {
+                        <tr><td colspan="6" class="text-center text-muted py-15">لا توجد وحدات</td></tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

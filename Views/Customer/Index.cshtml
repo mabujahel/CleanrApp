@@ -1,0 +1,158 @@
+@model CleanrApp.ViewModels.CustomerDashboardViewModel
+@using CleanrApp.Models
+@{
+    ViewData["Title"] = "الرئيسية";
+}
+
+<!-- Welcome & Visits -->
+<div class="row g-4 mb-5">
+    <div class="col-lg-8">
+        <div class="card" style="background: linear-gradient(135deg, #1a1a2e 0%, #0f3460 100%);">
+            <div class="card-body py-8 px-8">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <h3 class="text-white fw-bolder fs-2x mb-2">مرحباً، @Model.Customer.FullName</h3>
+                        <p class="text-white opacity-75 mb-0">يمكنك إدارة طلبات تنظيف وحداتك من هنا</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="rounded-circle d-flex align-items-center justify-content-center"
+                             style="width:80px;height:80px;background:rgba(255,255,255,0.15);">
+                            <i class="bi bi-building-check text-white fs-1"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="card h-100">
+            <div class="card-body text-center py-6">
+                <div class="mb-3">
+                    <span class="fs-3x fw-bolder @(Model.RemainingVisits <= 2 ? "text-danger" : "text-success")">
+                        @Model.RemainingVisits
+                    </span>
+                    <span class="text-muted fs-5"> / @Model.Customer.AllowedVisits</span>
+                </div>
+                <div class="text-gray-600 fw-semibold mb-4">زيارة متبقية</div>
+                <div class="progress h-10px w-75 mx-auto">
+                    <div class="progress-bar @(Model.RemainingVisits <= 2 ? "bg-danger" : "bg-success")"
+                         style="width:@(Model.Customer.AllowedVisits > 0 ? (Model.RemainingVisits * 100 / Model.Customer.AllowedVisits) : 0)%"></div>
+                </div>
+                @if (Model.RemainingVisits <= 2 && Model.RemainingVisits > 0)
+                {
+                    <div class="mt-3"><span class="badge badge-light-danger">رصيد منخفض!</span></div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Active Requests -->
+@if (Model.ActiveRequests.Any())
+{
+    <div class="mb-7">
+        <h4 class="fw-bold mb-4">طلباتي النشطة</h4>
+        <div class="row g-4">
+            @foreach (var req in Model.ActiveRequests)
+            {
+                <div class="col-md-6 col-xl-4">
+                    <div class="card border-start border-4 @(req.Status == RequestStatus.InProgress ? "border-primary" : req.Status == RequestStatus.Done || req.Status == RequestStatus.SupervisorApproved ? "border-success" : "border-warning")">
+                        <div class="card-body py-4">
+                            <div class="d-flex justify-content-between mb-3">
+                                <span class="fw-bold">@req.RequestNumber</span>
+                                <partial name="_StatusBadge" model="req.Status" />
+                            </div>
+                            <div class="text-muted fs-8 mb-2">
+                                <i class="bi bi-building me-1"></i>وحدة @req.Unit?.UnitNumber - @req.Unit?.Building?.Name
+                            </div>
+                            @if (req.ScheduledAt.HasValue)
+                            {
+                                <div class="text-muted fs-8 mb-3">
+                                    <i class="bi bi-calendar3 me-1"></i>@req.ScheduledAt.Value.ToString("dd/MM/yyyy HH:mm")
+                                </div>
+                            }
+                            <div class="d-flex gap-2">
+                                <a asp-action="RequestDetail" asp-route-id="@req.Id" class="btn btn-sm btn-light-primary flex-grow-1">
+                                    <i class="bi bi-eye me-1"></i>تفاصيل
+                                </a>
+                                @if (req.Status == RequestStatus.Pending)
+                                {
+                                    <form asp-action="CancelRequest" method="post" class="d-inline"
+                                          onsubmit="return confirm('هل تريد إلغاء هذا الطلب؟')">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="requestId" value="@req.Id" />
+                                        <button type="submit" class="btn btn-sm btn-light-danger">
+                                            <i class="bi bi-x"></i>
+                                        </button>
+                                    </form>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+}
+
+<!-- My Units -->
+<div class="row g-5">
+    <div class="col-lg-7">
+        <div class="card h-100">
+            <div class="card-header border-0 pt-5">
+                <h3 class="card-title"><span class="card-label fw-bold fs-4">وحداتي</span></h3>
+            </div>
+            <div class="card-body pt-0">
+                @foreach (var unit in Model.Units)
+                {
+                    <div class="d-flex align-items-center p-4 rounded-2 bg-light mb-3">
+                        <div class="symbol symbol-50px bg-primary me-4 rounded-2">
+                            <span class="symbol-label"><i class="bi bi-door-open text-white fs-3"></i></span>
+                        </div>
+                        <div class="flex-grow-1">
+                            <div class="fw-bold fs-5">وحدة @unit.UnitNumber</div>
+                            <div class="text-muted fs-8">@unit.Building?.Name - الطابق @unit.Floor</div>
+                        </div>
+                        <a asp-action="NewRequest" asp-route-unitId="@unit.Id" class="btn btn-sm btn-primary">
+                            <i class="bi bi-plus-circle me-1"></i>طلب تنظيف
+                        </a>
+                    </div>
+                }
+                @if (!Model.Units.Any())
+                {
+                    <div class="text-center text-muted py-8">
+                        <i class="bi bi-building fs-2x d-block mb-2"></i>
+                        لا توجد وحدات مسجلة
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-5">
+        <div class="card h-100">
+            <div class="card-header border-0 pt-5">
+                <h3 class="card-title"><span class="card-label fw-bold fs-4">آخر الطلبات</span></h3>
+                <div class="card-toolbar">
+                    <a asp-action="History" class="btn btn-sm btn-light">عرض الكل</a>
+                </div>
+            </div>
+            <div class="card-body pt-0">
+                @foreach (var req in Model.RecentRequests)
+                {
+                    <div class="d-flex align-items-center mb-4">
+                        <div class="flex-grow-1">
+                            <div class="fw-semibold">@req.RequestNumber</div>
+                            <div class="text-muted fs-8">@req.CreatedAt.ToString("dd/MM/yyyy")</div>
+                        </div>
+                        <partial name="_StatusBadge" model="req.Status" />
+                    </div>
+                }
+                @if (!Model.RecentRequests.Any())
+                {
+                    <div class="text-center text-muted py-5">لا توجد طلبات سابقة</div>
+                }
+            </div>
+        </div>
+    </div>
+</div>

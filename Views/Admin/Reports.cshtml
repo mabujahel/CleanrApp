@@ -1,0 +1,115 @@
+@using CleanrApp.Models
+@{
+    ViewData["Title"] = "التقارير والإحصائيات";
+}
+
+<div class="row g-4 mb-5">
+    <div class="col-sm-6 col-xl-3">
+        <div class="card bg-light-primary h-100">
+            <div class="card-body d-flex align-items-center gap-4 py-5">
+                <div class="symbol symbol-60px bg-primary rounded-2"><span class="symbol-label"><i class="bi bi-clipboard2-check text-white fs-1"></i></span></div>
+                <div>
+                    <div class="fs-2x fw-bolder text-primary">@ViewBag.TotalRequests</div>
+                    <div class="text-gray-600">إجمالي الطلبات</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="card bg-light-warning h-100">
+            <div class="card-body d-flex align-items-center gap-4 py-5">
+                <div class="symbol symbol-60px bg-warning rounded-2"><span class="symbol-label"><i class="bi bi-calendar-day text-white fs-1"></i></span></div>
+                <div>
+                    <div class="fs-2x fw-bolder text-warning">@ViewBag.TodayRequests</div>
+                    <div class="text-gray-600">طلبات اليوم</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="card bg-light-success h-100">
+            <div class="card-body d-flex align-items-center gap-4 py-5">
+                <div class="symbol symbol-60px bg-success rounded-2"><span class="symbol-label"><i class="bi bi-check2-all text-white fs-1"></i></span></div>
+                <div>
+                    <div class="fs-2x fw-bolder text-success">@ViewBag.Completed</div>
+                    <div class="text-gray-600">طلبات مكتملة</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="card bg-light-danger h-100">
+            <div class="card-body d-flex align-items-center gap-4 py-5">
+                <div class="symbol symbol-60px bg-danger rounded-2"><span class="symbol-label"><i class="bi bi-x-circle text-white fs-1"></i></span></div>
+                <div>
+                    <div class="fs-2x fw-bolder text-danger">@ViewBag.Cancelled</div>
+                    <div class="text-gray-600">طلبات ملغاة</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-5">
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-header"><h3 class="card-title">أداء العمال</h3></div>
+            <div class="card-body">
+                @if (ViewBag.CleanerPerformance != null)
+                {
+                    int maxCount = 1;
+                    foreach (var item in ViewBag.CleanerPerformance) { if (item.Count > maxCount) maxCount = item.Count; }
+                    int rank = 1;
+                    @foreach (var item in ViewBag.CleanerPerformance)
+                    {
+                        int pct = (int)(item.Count * 100.0 / maxCount);
+                        string medal = rank == 1 ? "🥇" : rank == 2 ? "🥈" : rank == 3 ? "🥉" : $"{rank}.";
+                        <div class="d-flex align-items-center gap-3 mb-4 p-3 bg-light rounded-2">
+                            <div class="symbol symbol-40px bg-light-success rounded-circle flex-shrink-0">
+                                <span class="symbol-label fw-bold text-success fs-6">@(item.FullName?.Substring(0,1) ?? "?")</span>
+                            </div>
+                            <div class="flex-grow-1">
+                                <div class="d-flex justify-content-between mb-1">
+                                    <span class="fw-semibold text-dark">@medal @item.FullName</span>
+                                    <span class="fw-bold text-success">@item.Count طلب</span>
+                                </div>
+                                <div class="progress" style="height:6px">
+                                    <div class="progress-bar bg-success" style="width:@pct%"></div>
+                                </div>
+                            </div>
+                        </div>
+                        rank++;
+                    }
+                }
+                else
+                {
+                    <div class="text-center text-muted py-5">لا توجد بيانات</div>
+                }
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-header"><h3 class="card-title">رصيد الزيارات للعملاء</h3></div>
+            <div class="card-body">
+                @if (ViewBag.Customers != null)
+                {
+                    foreach (var c in ViewBag.Customers)
+                    {
+                        var remaining = c.AllowedVisits - c.UsedVisits;
+                        <div class="d-flex align-items-center mb-4 p-3 bg-light rounded-2">
+                            <div class="symbol symbol-35px bg-light-primary me-3 rounded-circle">
+                                <span class="symbol-label fw-bold text-primary">@c.FullName?.Substring(0, 1)</span>
+                            </div>
+                            <div class="flex-grow-1">
+                                <div class="fw-semibold">@c.FullName</div>
+                                <div class="text-muted fs-8">مستخدمة: @c.UsedVisits / @c.AllowedVisits</div>
+                            </div>
+                            <span class="badge @(remaining <= 2 ? "badge-danger" : "badge-success") fs-6">@remaining متبقية</span>
+                        </div>
+                    }
+                }
+            </div>
+        </div>
+    </div>
+</div>

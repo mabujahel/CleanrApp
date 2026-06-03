@@ -1,0 +1,96 @@
+@model List<CleanrApp.Models.CleaningRequest>
+@using CleanrApp.Models
+@{
+    ViewData["Title"] = "طلبات التنظيف";
+    var currentStatus = ViewBag.CurrentStatus as RequestStatus?;
+}
+
+<div class="card">
+    <div class="card-header border-0 pt-5">
+        <h3 class="card-title">
+            <span class="card-label fw-bold fs-3">طلبات التنظيف</span>
+            <span class="text-muted mt-1 fw-semibold fs-7 ms-3">(@Model.Count طلب)</span>
+        </h3>
+        <div class="card-toolbar flex-wrap gap-2">
+            <a asp-action="Requests" class="btn btn-sm @(currentStatus == null ? "btn-primary" : "btn-light")">الكل</a>
+            <a asp-action="Requests" asp-route-status="1" class="btn btn-sm @(currentStatus == RequestStatus.Pending ? "btn-warning" : "btn-light-warning")">قيد الانتظار</a>
+            <a asp-action="Requests" asp-route-status="5" class="btn btn-sm @(currentStatus == RequestStatus.InProgress ? "btn-info" : "btn-light-info")">جاري التنفيذ</a>
+            <a asp-action="Requests" asp-route-status="7" class="btn btn-sm @(currentStatus == RequestStatus.SupervisorApproved ? "btn-success" : "btn-light-success")">اعتماد مبدئي</a>
+            <a asp-action="Requests" asp-route-status="8" class="btn btn-sm @(currentStatus == RequestStatus.AdminApproved ? "btn-success" : "btn-light-success")">مكتملة</a>
+        </div>
+    </div>
+    <div class="card-body py-3">
+        <div class="table-responsive">
+            <table class="table table-row-dashed table-row-gray-300 align-middle gs-0 gy-4" id="requestsTable">
+                <thead>
+                    <tr class="fw-bold text-muted bg-light">
+                        <th class="ps-4">رقم الطلب</th>
+                        <th>العميل</th>
+                        <th>الوحدة / المبنى</th>
+                        <th>المشرف</th>
+                        <th>العامل</th>
+                        <th>الموعد</th>
+                        <th>الحالة</th>
+                        <th>الإجراءات</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var req in Model)
+                    {
+                        <tr>
+                            <td class="ps-4">
+                                <span class="fw-bold text-dark d-block">@req.RequestNumber</span>
+                                <span class="text-muted fs-8">@req.CreatedAt.ToString("dd/MM/yyyy")</span>
+                            </td>
+                            <td>
+                                <span class="fw-semibold text-dark d-block">@req.Customer?.FullName</span>
+                                <span class="text-muted fs-8">@req.Customer?.PhoneNumber</span>
+                            </td>
+                            <td>
+                                <span class="fw-semibold d-block">وحدة @req.Unit?.UnitNumber</span>
+                                <span class="text-muted fs-8">@req.Unit?.Building?.Name</span>
+                            </td>
+                            <td>@(req.Supervisor?.FullName ?? "<span class='text-muted'>غير محدد</span>")</td>
+                            <td>@(req.Cleaner?.FullName ?? "<span class='text-muted'>غير محدد</span>")</td>
+                            <td>
+                                @if (req.ScheduledAt.HasValue)
+                                {
+                                    <span class="badge badge-light-primary">@req.ScheduledAt.Value.ToString("dd/MM/yyyy HH:mm")</span>
+                                }
+                                else
+                                {
+                                    <span class="text-muted fs-8">غير محدد</span>
+                                }
+                            </td>
+                            <td><partial name="_StatusBadge" model="req.Status" /></td>
+                            <td>
+                                <a asp-action="RequestDetail" asp-route-id="@req.Id"
+                                   class="btn btn-icon btn-bg-light btn-active-color-primary btn-sm me-1" title="عرض">
+                                    <i class="bi bi-eye fs-4"></i>
+                                </a>
+                                @if (req.Status == RequestStatus.SupervisorApproved)
+                                {
+                                    <form asp-action="ApproveRequest" method="post" class="d-inline"
+                                          onsubmit="return confirm('هل تريد الاعتماد النهائي لهذا الطلب؟')">
+                                        <input type="hidden" name="requestId" value="@req.Id" />
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-icon btn-bg-light btn-active-color-success btn-sm" title="اعتماد نهائي">
+                                            <i class="bi bi-check2-circle fs-4"></i>
+                                        </button>
+                                    </form>
+                                }
+                            </td>
+                        </tr>
+                    }
+                    @if (!Model.Any())
+                    {
+                        <tr><td colspan="8" class="text-center text-muted py-15">
+                            <i class="bi bi-inbox fs-2tx text-gray-300 d-block mb-4"></i>
+                            لا توجد طلبات
+                        </td></tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

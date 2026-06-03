@@ -1,0 +1,69 @@
+@model List<CleanrApp.Models.CleaningRequest>
+@using CleanrApp.Models
+@{
+    ViewData["Title"] = "مهامي";
+}
+
+@if (!Model.Any())
+{
+    <div class="text-center py-20">
+        <i class="bi bi-inbox fs-3x text-gray-300 d-block mb-5"></i>
+        <h4 class="text-gray-600">لا توجد مهام مسندة إليك حالياً</h4>
+    </div>
+}
+else
+{
+    <div class="row g-5">
+        @foreach (var req in Model)
+        {
+            var cardColor = req.Status == RequestStatus.InProgress ? "border-primary" : req.Status == RequestStatus.Done ? "border-success" : "border-warning";
+            var badgeIcon = req.Status == RequestStatus.InProgress ? "bi-hourglass-split text-primary" : req.Status == RequestStatus.Done ? "bi-check2-all text-success" : "bi-clock text-warning";
+
+            <div class="col-md-6 col-xl-4">
+                <div class="card border @cardColor h-100">
+                    <div class="card-header border-0 pb-0">
+                        <div class="d-flex justify-content-between align-items-center w-100">
+                            <h5 class="fw-bold mb-0">@req.RequestNumber</h5>
+                            <partial name="_StatusBadge" model="req.Status" />
+                        </div>
+                    </div>
+                    <div class="card-body pt-3">
+                        <div class="d-flex flex-column gap-3 mb-4">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="symbol symbol-35px bg-light rounded"><span class="symbol-label"><i class="bi bi-building text-primary fs-5"></i></span></div>
+                                <div>
+                                    <div class="fw-bold">وحدة @req.Unit?.UnitNumber</div>
+                                    <div class="text-muted fs-8">@req.Unit?.Building?.Name</div>
+                                </div>
+                            </div>
+                            @if (req.ScheduledAt.HasValue)
+                            {
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="symbol symbol-35px bg-light rounded"><span class="symbol-label"><i class="bi bi-calendar3 text-warning fs-5"></i></span></div>
+                                    <div>
+                                        <div class="fw-semibold">@req.ScheduledAt.Value.ToString("dd/MM/yyyy")</div>
+                                        <div class="text-muted fs-8">@req.ScheduledAt.Value.ToString("HH:mm")</div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+
+                        <!-- Services Summary -->
+                        <div class="d-flex flex-wrap gap-1 mb-4">
+                            @if (req.ChangeBedSheet) { <span class="badge badge-light-secondary fs-8">المفرش</span> }
+                            @if (req.ChangeLinens) { <span class="badge badge-light-secondary fs-8">الملايات</span> }
+                            @if (req.ChangePillowCases) { <span class="badge badge-light-secondary fs-8">المخدات</span> }
+                            @if (req.MakeBed) { <span class="badge badge-light-secondary fs-8">ترتيب السرير</span> }
+                            @if (req.CleanBathroom) { <span class="badge badge-light-info fs-8">الحمام</span> }
+                            @if (req.CleanKitchen) { <span class="badge badge-light-info fs-8">المطبخ</span> }
+                        </div>
+
+                        <a asp-action="RequestDetail" asp-route-id="@req.Id" class="btn btn-primary w-100">
+                            <i class="bi bi-arrow-left-circle me-2"></i>فتح التفاصيل
+                        </a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}

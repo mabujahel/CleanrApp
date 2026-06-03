@@ -1,0 +1,19 @@
+@{
+    var ctrl = ViewContext.RouteData.Values["controller"]?.ToString() ?? "";
+    string A(string c) => ctrl == c ? "active" : "";
+}
+<div class="px-3 mb-1">
+    <span class="menu-section">القائمة</span>
+</div>
+<div class="menu-item">
+    <a class="menu-link @A("Supervisor")" href="/Supervisor/Index">
+        <span class="menu-icon"><i class="bi bi-grid-1x2"></i></span>
+        <span class="menu-title">لوحة التحكم</span>
+    </a>
+</div>
+<div class="menu-item">
+    <a class="menu-link" href="/Supervisor/Index">
+        <span class="menu-icon"><i class="bi bi-clipboard2-check"></i></span>
+        <span class="menu-title">طلباتي</span>
+    </a>
+</div>

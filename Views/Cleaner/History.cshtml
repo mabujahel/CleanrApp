@@ -1,0 +1,33 @@
+@model List<CleanrApp.Models.CleaningRequest>
+@{
+    ViewData["Title"] = "سجل الأعمال";
+}
+
+<div class="card">
+    <div class="card-header border-0 pt-5">
+        <h3 class="card-title"><span class="card-label fw-bold fs-3">سجل الأعمال المكتملة</span></h3>
+    </div>
+    <div class="card-body py-3">
+        <div class="table-responsive">
+            <table class="table table-row-dashed align-middle">
+                <thead><tr class="fw-bold text-muted bg-light">
+                    <th>رقم الطلب</th><th>الوحدة</th><th>تاريخ الإنجاز</th>
+                </tr></thead>
+                <tbody>
+                    @foreach (var req in Model)
+                    {
+                        <tr>
+                            <td class="fw-bold">@req.RequestNumber</td>
+                            <td>وحدة @req.Unit?.UnitNumber - @req.Unit?.Building?.Name</td>
+                            <td class="text-muted">@req.CompletedAt?.ToString("dd/MM/yyyy HH:mm")</td>
+                        </tr>
+                    }
+                    @if (!Model.Any())
+                    {
+                        <tr><td colspan="3" class="text-center text-muted py-10">لا توجد أعمال مكتملة</td></tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

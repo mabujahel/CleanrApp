@@ -1,0 +1,183 @@
+@model CleanrApp.ViewModels.CreateRequestViewModel
+@using CleanrApp.Models
+@{
+    ViewData["Title"] = "طلب تنظيف جديد";
+    var units = ViewBag.Units as List<Unit> ?? new();
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title"><i class="bi bi-plus-circle text-primary me-2"></i>طلب تنظيف جديد</h3>
+                <div class="card-toolbar">
+                    <a asp-action="Index" class="btn btn-sm btn-light"><i class="bi bi-arrow-right me-1"></i>عودة</a>
+                </div>
+            </div>
+            <div class="card-body">
+                <form asp-action="NewRequest" method="post">
+                    @Html.AntiForgeryToken()
+                    <div asp-validation-summary="All" class="alert alert-danger mb-5"></div>
+
+                    <!-- Unit Selection -->
+                    <div class="mb-6">
+                        <label asp-for="UnitId" class="form-label required fw-semibold fs-6">اختر الوحدة</label>
+                        <div class="row g-3">
+                            @foreach (var unit in units)
+                            {
+                                <div class="col-sm-6">
+                                    <input type="radio" name="UnitId" value="@unit.Id" id="unit_@unit.Id" class="d-none unit-radio"
+                                           @(Model.UnitId == unit.Id ? "checked" : "") />
+                                    <label for="unit_@unit.Id" class="unit-card card border-2 cursor-pointer p-4 w-100 text-start @(Model.UnitId == unit.Id ? "border-primary bg-light-primary" : "border-dashed")">
+                                        <div class="d-flex align-items-center gap-3">
+                                            <div class="symbol symbol-40px bg-light-primary rounded">
+                                                <span class="symbol-label"><i class="bi bi-door-open text-primary fs-4"></i></span>
+                                            </div>
+                                            <div>
+                                                <div class="fw-bold">وحدة @unit.UnitNumber</div>
+                                                <div class="text-muted fs-8">@unit.Building?.Name - الطابق @unit.Floor</div>
+                                            </div>
+                                        </div>
+                                    </label>
+                                </div>
+                            }
+                        </div>
+                        <span asp-validation-for="UnitId" class="text-danger fs-7"></span>
+                    </div>
+
+                    <div class="separator my-6"></div>
+
+                    <!-- Schedule -->
+                    <div class="mb-6">
+                        <label asp-for="ScheduledAt" class="form-label fw-semibold fs-6">
+                            <i class="bi bi-calendar3 me-2 text-warning"></i>موعد التنظيف
+                        </label>
+                        <input asp-for="ScheduledAt" type="datetime-local" class="form-control form-control-lg" />
+                        <div class="form-text text-muted">اتركه فارغاً لطلب فوري، أو حدد موعداً مسبقاً</div>
+                    </div>
+
+                    <!-- Description -->
+                    <div class="mb-6">
+                        <label asp-for="ServiceDescription" class="form-label fw-semibold fs-6">
+                            <i class="bi bi-sticky me-2 text-info"></i>وصف الخدمة المطلوبة
+                        </label>
+                        <textarea asp-for="ServiceDescription" class="form-control" rows="3"
+                                  placeholder="صف ما تحتاجه بالتفصيل..."></textarea>
+                    </div>
+
+                    <div class="separator my-6"></div>
+
+                    <!-- Additional Services -->
+                    <h5 class="fw-bold mb-4"><i class="bi bi-list-check me-2 text-primary"></i>الخدمات الإضافية</h5>
+                    <div class="row g-3">
+                        <div class="col-sm-6 col-md-4">
+                            <div class="service-card card border p-4 cursor-pointer">
+                                <input asp-for="ChangeBedSheet" type="checkbox" class="d-none service-check" id="svc_sheet" />
+                                <label class="cursor-pointer w-100 text-start d-flex align-items-center gap-3" for="svc_sheet">
+                                    <div class="symbol symbol-40px bg-light-primary rounded"><span class="symbol-label"><i class="bi bi-layers text-primary fs-4"></i></span></div>
+                                    <span class="fw-semibold">تغيير مفرش السرير</span>
+                                    <i class="bi bi-check-circle-fill text-primary ms-auto check-icon" style="display:none;"></i>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 col-md-4">
+                            <div class="service-card card border p-4 cursor-pointer">
+                                <input asp-for="ChangeLinens" type="checkbox" class="d-none service-check" id="svc_linen" />
+                                <label class="cursor-pointer w-100 text-start d-flex align-items-center gap-3" for="svc_linen">
+                                    <div class="symbol symbol-40px bg-light-primary rounded"><span class="symbol-label"><i class="bi bi-square text-primary fs-4"></i></span></div>
+                                    <span class="fw-semibold">تغيير الملايات</span>
+                                    <i class="bi bi-check-circle-fill text-primary ms-auto check-icon" style="display:none;"></i>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 col-md-4">
+                            <div class="service-card card border p-4 cursor-pointer">
+                                <input asp-for="ChangePillowCases" type="checkbox" class="d-none service-check" id="svc_pillow" />
+                                <label class="cursor-pointer w-100 text-start d-flex align-items-center gap-3" for="svc_pillow">
+                                    <div class="symbol symbol-40px bg-light-primary rounded"><span class="symbol-label"><i class="bi bi-emoji-smile text-primary fs-4"></i></span></div>
+                                    <span class="fw-semibold">تغيير أكياس المخدات</span>
+                                    <i class="bi bi-check-circle-fill text-primary ms-auto check-icon" style="display:none;"></i>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 col-md-4">
+                            <div class="service-card card border p-4 cursor-pointer">
+                                <input asp-for="MakeBed" type="checkbox" class="d-none service-check" id="svc_bed" />
+                                <label class="cursor-pointer w-100 text-start d-flex align-items-center gap-3" for="svc_bed">
+                                    <div class="symbol symbol-40px bg-light-info rounded"><span class="symbol-label"><i class="bi bi-house-heart text-info fs-4"></i></span></div>
+                                    <span class="fw-semibold">ترتيب السرير</span>
+                                    <i class="bi bi-check-circle-fill text-info ms-auto check-icon" style="display:none;"></i>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 col-md-4">
+                            <div class="service-card card border p-4 cursor-pointer">
+                                <input asp-for="CleanBathroom" type="checkbox" class="d-none service-check" id="svc_bath" />
+                                <label class="cursor-pointer w-100 text-start d-flex align-items-center gap-3" for="svc_bath">
+                                    <div class="symbol symbol-40px bg-light-info rounded"><span class="symbol-label"><i class="bi bi-droplet text-info fs-4"></i></span></div>
+                                    <span class="fw-semibold">تنظيف دورة المياه</span>
+                                    <i class="bi bi-check-circle-fill text-info ms-auto check-icon" style="display:none;"></i>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 col-md-4">
+                            <div class="service-card card border p-4 cursor-pointer">
+                                <input asp-for="CleanKitchen" type="checkbox" class="d-none service-check" id="svc_kitchen" />
+                                <label class="cursor-pointer w-100 text-start d-flex align-items-center gap-3" for="svc_kitchen">
+                                    <div class="symbol symbol-40px bg-light-info rounded"><span class="symbol-label"><i class="bi bi-fire text-info fs-4"></i></span></div>
+                                    <span class="fw-semibold">تنظيف المطبخ</span>
+                                    <i class="bi bi-check-circle-fill text-info ms-auto check-icon" style="display:none;"></i>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="separator my-6"></div>
+                    <div class="d-flex justify-content-end gap-3">
+                        <a asp-action="Index" class="btn btn-light btn-lg">إلغاء</a>
+                        <button type="submit" class="btn btn-primary btn-lg px-8">
+                            <i class="bi bi-send me-2"></i>إرسال الطلب
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        // Unit card selection
+        document.querySelectorAll('.unit-radio').forEach(radio => {
+            radio.addEventListener('change', function() {
+                document.querySelectorAll('.unit-card').forEach(card => {
+                    card.classList.remove('border-primary', 'bg-light-primary');
+                    card.classList.add('border-dashed');
+                });
+                if (this.checked) {
+                    const label = document.querySelector(`label[for="${this.id}"]`);
+                    label.classList.add('border-primary', 'bg-light-primary');
+                    label.classList.remove('border-dashed');
+                }
+            });
+        });
+
+        // Service card toggle
+        document.querySelectorAll('.service-check').forEach(cb => {
+            const updateCard = () => {
+                const label = cb.nextElementSibling;
+                const icon = label.querySelector('.check-icon');
+                if (cb.checked) {
+                    label.closest('.service-card').classList.add('border-primary');
+                    icon.style.display = 'block';
+                } else {
+                    label.closest('.service-card').classList.remove('border-primary');
+                    icon.style.display = 'none';
+                }
+            };
+            cb.addEventListener('change', updateCard);
+            updateCard();
+        });
+    </script>
+}

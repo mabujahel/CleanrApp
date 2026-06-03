@@ -1,0 +1,17 @@
+@model CleanrApp.Models.RequestStatus
+@{
+    var (label, css) = Model switch {
+        CleanrApp.Models.RequestStatus.Pending => ("قيد الانتظار", "badge-light-warning"),
+        CleanrApp.Models.RequestStatus.Received => ("تم الاستلام", "badge-light-info"),
+        CleanrApp.Models.RequestStatus.AssignedSupervisor => ("تم تعيين مشرف", "badge-light-info"),
+        CleanrApp.Models.RequestStatus.AssignedCleaner => ("تم تعيين عامل", "badge-light-primary"),
+        CleanrApp.Models.RequestStatus.InProgress => ("جاري التنفيذ", "badge-light-primary"),
+        CleanrApp.Models.RequestStatus.Done => ("تم الانتهاء", "badge-light-success"),
+        CleanrApp.Models.RequestStatus.SupervisorApproved => ("اعتماد مبدئي", "badge-light-success"),
+        CleanrApp.Models.RequestStatus.AdminApproved => ("مكتمل ✓", "badge-success"),
+        CleanrApp.Models.RequestStatus.Cancelled => ("ملغى", "badge-light-danger"),
+        CleanrApp.Models.RequestStatus.Rejected => ("مرفوض", "badge-danger"),
+        _ => (Model.ToString(), "badge-light-secondary")
+    };
+}
+<span class="badge @css fw-semibold">@label</span>

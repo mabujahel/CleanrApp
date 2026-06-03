@@ -1,0 +1,178 @@
+@model CleanrApp.Models.CleaningRequest
+@using CleanrApp.Models
+@{
+    ViewData["Title"] = $"طلب #{Model.RequestNumber}";
+    var cleaners = ViewBag.Cleaners as List<ApplicationUser> ?? new();
+}
+
+<div class="row g-5">
+    <div class="col-lg-8">
+        <div class="card mb-5">
+            <div class="card-header">
+                <h3 class="card-title">تفاصيل الطلب</h3>
+                <div class="card-toolbar"><partial name="_StatusBadge" model="Model.Status" /></div>
+            </div>
+            <div class="card-body">
+                <div class="row g-4 mb-5">
+                    <div class="col-md-6">
+                        <div class="text-muted fs-8 mb-1">العميل</div>
+                        <div class="fw-bold">@Model.Customer?.FullName</div>
+                        <div class="text-muted fs-8">@Model.Customer?.PhoneNumber</div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="text-muted fs-8 mb-1">الوحدة</div>
+                        <div class="fw-bold">وحدة @Model.Unit?.UnitNumber</div>
+                        <div class="text-muted fs-8">@Model.Unit?.Building?.Name - الطابق @Model.Unit?.Floor</div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="text-muted fs-8 mb-1">الموعد المحدد</div>
+                        <div class="fw-bold">@(Model.ScheduledAt?.ToString("dd/MM/yyyy HH:mm") ?? "غير محدد")</div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="text-muted fs-8 mb-1">العامل المعين</div>
+                        <div class="fw-bold">@(Model.Cleaner?.FullName ?? "لم يعين بعد")</div>
+                    </div>
+                </div>
+
+                @if (!string.IsNullOrEmpty(Model.ServiceDescription))
+                {
+                    <div class="separator my-4"></div>
+                    <h6 class="text-muted mb-2">وصف الخدمة</h6>
+                    <p>@Model.ServiceDescription</p>
+                }
+
+                <div class="separator my-4"></div>
+                <h6 class="text-muted mb-3">الخدمات الإضافية</h6>
+                <div class="d-flex flex-wrap gap-2">
+                    @if (Model.ChangeBedSheet) { <span class="badge badge-light-primary py-2 px-3">تغيير المفرش</span> }
+                    @if (Model.ChangeLinens) { <span class="badge badge-light-primary py-2 px-3">تغيير الملايات</span> }
+                    @if (Model.ChangePillowCases) { <span class="badge badge-light-primary py-2 px-3">أكياس المخدات</span> }
+                    @if (Model.MakeBed) { <span class="badge badge-light-primary py-2 px-3">ترتيب السرير</span> }
+                    @if (Model.CleanBathroom) { <span class="badge badge-light-info py-2 px-3">تنظيف الحمام</span> }
+                    @if (Model.CleanKitchen) { <span class="badge badge-light-info py-2 px-3">تنظيف المطبخ</span> }
+                </div>
+
+                @if (!string.IsNullOrEmpty(Model.CleanerNotes))
+                {
+                    <div class="separator my-4"></div>
+                    <h6 class="text-muted mb-2">ملاحظات العامل</h6>
+                    <div class="notice d-flex bg-light-success rounded border-success border border-dashed p-4">
+                        <i class="bi bi-person-workspace fs-3 text-success me-3"></i>
+                        <span>@Model.CleanerNotes</span>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Photos -->
+        @if (Model.Photos.Any())
+        {
+            <div class="card mb-5">
+                <div class="card-header"><h3 class="card-title">صور التنظيف</h3></div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        @foreach (var photo in Model.Photos)
+                        {
+                            <div class="col-sm-4">
+                                <img src="@photo.FilePath" class="img-fluid rounded" style="height:160px;object-fit:cover;width:100%;" />
+                                <div class="text-muted fs-8 mt-1 text-center">@photo.PhotoType - @photo.UploadedAt.ToString("dd/MM")</div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+
+        <!-- Notes -->
+        <div class="card">
+            <div class="card-header"><h3 class="card-title">الملاحظات</h3></div>
+            <div class="card-body">
+                @foreach (var note in Model.Notes.OrderByDescending(n => n.CreatedAt))
+                {
+                    <div class="d-flex mb-4">
+                        <div class="symbol symbol-35px me-3"><span class="symbol-label bg-light-primary rounded-circle"><i class="bi bi-person text-primary"></i></span></div>
+                        <div class="flex-grow-1">
+                            <div class="d-flex justify-content-between mb-1">
+                                <span class="fw-semibold">@note.Author?.FullName</span>
+                                <span class="text-muted fs-8">@note.CreatedAt.ToString("dd/MM HH:mm")</span>
+                            </div>
+                            <div class="text-gray-700">@note.Content</div>
+                        </div>
+                    </div>
+                }
+                <form asp-action="AddNote" method="post" class="mt-4">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="requestId" value="@Model.Id" />
+                    <textarea name="content" class="form-control mb-3" rows="3" placeholder="إضافة ملاحظة..." required></textarea>
+                    <button type="submit" class="btn btn-primary btn-sm"><i class="bi bi-send me-2"></i>إضافة</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="col-lg-4">
+        @if (Model.Status != RequestStatus.AdminApproved && Model.Status != RequestStatus.Cancelled)
+        {
+            <div class="card mb-5">
+                <div class="card-header"><h3 class="card-title">تعيين عامل</h3></div>
+                <div class="card-body">
+                    <form asp-action="AssignCleaner" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="requestId" value="@Model.Id" />
+                        <select name="cleanerId" class="form-select mb-3" required>
+                            <option value="">-- اختر العامل --</option>
+                            @foreach (var c in cleaners)
+                            {
+                                <option value="@c.Id" selected="@(Model.CleanerId == c.Id)">@c.FullName</option>
+                            }
+                        </select>
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="bi bi-person-check me-2"></i>تعيين العامل
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Update Status -->
+            <div class="card mb-5">
+                <div class="card-header"><h3 class="card-title">تغيير الحالة</h3></div>
+                <div class="card-body d-flex flex-column gap-3">
+                    <form asp-action="UpdateStatus" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="requestId" value="@Model.Id" />
+                        <input type="hidden" name="status" value="@((int)RequestStatus.Received)" />
+                        <button type="submit" class="btn btn-light-info w-100">تم استلام الطلب</button>
+                    </form>
+                    <form asp-action="UpdateStatus" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="requestId" value="@Model.Id" />
+                        <input type="hidden" name="status" value="@((int)RequestStatus.InProgress)" />
+                        <button type="submit" class="btn btn-light-primary w-100">جاري التنفيذ</button>
+                    </form>
+                </div>
+            </div>
+
+            @if (Model.Status == RequestStatus.Done)
+            {
+                <div class="card border-success mb-5">
+                    <div class="card-body text-center py-5">
+                        <i class="bi bi-patch-check text-success fs-3x mb-3 d-block"></i>
+                        <form asp-action="PreliminaryApprove" method="post"
+                              onsubmit="return confirm('تأكيد الاعتماد المبدئي؟')">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="requestId" value="@Model.Id" />
+                            <button type="submit" class="btn btn-success w-100">
+                                <i class="bi bi-check2-circle me-2"></i>اعتماد مبدئي
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            }
+        }
+
+        <a asp-action="Index" class="btn btn-light w-100">
+            <i class="bi bi-arrow-right me-2"></i>العودة
+        </a>
+    </div>
+</div>

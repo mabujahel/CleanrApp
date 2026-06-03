@@ -1,0 +1,42 @@
+@model List<CleanrApp.Models.ApplicationUser>
+@using CleanrApp.Models
+@{
+    ViewData["Title"] = "إدارة المشرفين";
+}
+
+<div class="card">
+    <div class="card-header border-0 pt-5">
+        <h3 class="card-title"><span class="card-label fw-bold fs-3">المشرفون</span></h3>
+        <div class="card-toolbar">
+            <a asp-action="CreateSupervisor" class="btn btn-sm btn-warning">
+                <i class="bi bi-person-plus me-2"></i>إضافة مشرف
+            </a>
+        </div>
+    </div>
+    <div class="card-body py-3">
+        <div class="table-responsive">
+            <table class="table table-row-dashed align-middle">
+                <thead><tr class="fw-bold text-muted bg-light">
+                    <th class="ps-4">المشرف</th><th>البريد الإلكتروني</th><th>الجوال</th><th>اعتماد نهائي</th><th>الحالة</th>
+                </tr></thead>
+                <tbody>
+                    @foreach (var u in Model)
+                    {
+                        <tr>
+                            <td class="ps-4">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="symbol symbol-40px bg-light-warning rounded-circle"><span class="symbol-label fw-bold text-warning">@u.FullName.Substring(0,1)</span></div>
+                                    <span class="fw-bold">@u.FullName</span>
+                                </div>
+                            </td>
+                            <td>@u.Email</td>
+                            <td>@(u.PhoneNumber ?? "—")</td>
+                            <td><span class="badge @(u.CanFinalApprove ? "badge-light-success" : "badge-light-secondary")">@(u.CanFinalApprove ? "مخوّل" : "غير مخوّل")</span></td>
+                            <td><span class="badge @(u.Status == UserStatus.Active ? "badge-light-success" : "badge-light-danger")">@(u.Status == UserStatus.Active ? "نشط" : "موقوف")</span></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
